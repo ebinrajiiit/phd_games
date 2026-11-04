@@ -3,86 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reference Hunt — Real or Hallucinated?</title>
-<style>
-  :root{--navy:#003087;--gold:#F5A623;--green:#1B7F4B;--red:#C0392B;--bg:#f6f7fb;--card:#fff;--ink:#1d2333;--muted:#5d6475;--line:#dfe3ec;--accent:#003087}
-  @media (prefers-color-scheme:dark){:root{--bg:#0e1424;--card:#172038;--ink:#eef1f8;--muted:#a3abc0;--line:#2a3554;--accent:#8fb1ff}}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-  header{background:var(--navy);color:#fff;padding:14px 16px;border-bottom:4px solid var(--gold);display:flex;justify-content:space-between;align-items:center;gap:12px}
-  header a{color:#fff;text-decoration:none;font-size:14px;opacity:.85}
-  header b{font-size:17px}
-  main{max-width:560px;margin:0 auto;padding:16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
-  h1{font-size:24px;line-height:1.2;margin:4px 0 8px;color:var(--accent)}
-  p{margin:0 0 10px}
-  .muted{color:var(--muted)}
-  .btn{display:block;width:100%;border:0;border-radius:12px;padding:15px;font:inherit;font-weight:700;font-size:17px;cursor:pointer}
-  .primary{background:var(--navy);color:#fff}
-  @media (prefers-color-scheme:dark){.primary{background:#2c5bd6}}
-  .row{display:flex;gap:10px}
-  .real{background:var(--green);color:#fff}
-  .fake{background:var(--red);color:#fff}
-  .bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:6px 0 14px}
-  .bar i{display:block;height:100%;background:var(--gold);width:100%;transition:width .1s linear}
-  .meta{display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
-  .cite{font-family:Georgia,"Times New Roman",serif;font-size:17px;line-height:1.55}
-  .cite em{font-style:italic}
-  .verdict{border-radius:12px;padding:12px 14px;margin:12px 0}
-  .ok{background:rgba(27,127,75,.12);border:1px solid var(--green)}
-  .no{background:rgba(192,57,43,.10);border:1px solid var(--red)}
-  .tag{display:inline-block;font-weight:800;font-size:12px;border-radius:99px;padding:2px 9px;color:#fff}
-  .tR{background:var(--green)} .tF{background:var(--red)}
-  .big{font-size:56px;font-weight:800;line-height:1;color:var(--accent);margin:6px 0}
-  ol{padding-left:20px;margin:0} li{margin-bottom:12px}
-  .hidden{display:none}
-  .nick{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit;background:var(--bg);color:inherit;margin:4px 0 12px}
-  .sent{font-size:14px;text-align:center;margin-top:6px}
-  .tip{border-left:4px solid var(--gold);padding:8px 12px;background:rgba(245,166,35,.1);border-radius:6px}
-</style>
+<title>Reference Hunt</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><b>Reference Hunt</b><a href="index.html">All games</a></header>
-<main>
+<header class="bar"><p class="title">Reference Hunt</p><a href="index.html">All games</a></header>
+<main class="sheet">
 
-  <section id="start" class="card">
-    <h1>Real or Hallucinated?</h1>
-    <p>You'll see 10 references on explainable AI and federated learning. Some are real papers. Some were invented, the way a chatbot invents them.</p>
-    <p class="muted">15 seconds each. No searching — that's the point.</p>
-    <label for="nick" style="font-weight:700">Nickname for the room screen <span class="muted" style="font-weight:400">(optional)</span></label>
-    <input class="nick" id="nick" maxlength="30" autocomplete="off" placeholder="Leave blank for a random one">
+  <section id="start">
+    <h1>Real or hallucinated?</h1>
+    <p>Ten references on explainable AI and federated learning. Some are real papers. Some were invented, the way a chatbot invents them.</p>
+    <p class="muted">You get 15 seconds for each. No searching — that's the point.</p>
+    <label for="nick">Nickname for the room screen<span class="hint">Optional. Leave blank and we'll pick one for you.</span></label>
+    <input type="text" id="nick" maxlength="30" autocomplete="off">
+    <p></p>
     <button class="btn primary" id="go">Start</button>
   </section>
 
   <section id="play" class="hidden">
-    <div class="meta"><span id="qn">1 / 10</span><span>Score: <b id="sc">0</b></span></div>
-    <div class="bar"><i id="tb"></i></div>
-    <div class="card"><div class="cite" id="cite"></div></div>
-    <div class="row" id="choices">
-      <button class="btn real" data-a="R">Real</button>
-      <button class="btn fake" data-a="F">Hallucinated</button>
+    <div class="progress"><span id="qn">1 of 10</span><span>Score <b id="sc">0</b></span></div>
+    <div class="drain"><i id="tb"></i></div>
+    <p class="cite" id="cite"></p>
+    <div class="pair" id="choices">
+      <button class="btn blue" data-a="R">Real</button>
+      <button class="btn red" data-a="F">Hallucinated</button>
     </div>
     <div id="fb" class="hidden">
-      <div class="verdict" id="vd"></div>
+      <div class="note" id="vd"></div>
       <button class="btn primary" id="next">Next</button>
     </div>
   </section>
 
   <section id="end" class="hidden">
-    <div class="card" style="text-align:center">
-      <p class="muted">Your score</p>
-      <div class="big"><span id="fs">0</span>/10</div>
-      <p id="msg"></p>
-      <p class="sent muted" id="sent"></p>
-    </div>
-    <div class="card">
-      <p class="tip"><b>How to check any reference in 30 seconds:</b> search the exact title in quotes on Google Scholar or Semantic Scholar, then open the DOI. No hit, no citation.</p>
-    </div>
-    <div class="card">
-      <h1 style="font-size:19px">All ten, explained</h1>
-      <ol id="review"></ol>
-    </div>
-    <button class="btn primary" id="again">Play again</button>
+    <p class="muted" style="margin:0">Your score</p>
+    <div class="score"><span id="fs">0</span><small> out of 10</small></div>
+    <p id="msg"></p>
+    <p class="status" id="sent"></p>
+    <hr>
+    <p><b>Checking any reference takes 30 seconds.</b> Search the exact title, in quotes, on Google Scholar or Semantic Scholar, then open the DOI. No match means no citation.</p>
+    <h2>The ten references</h2>
+    <ol class="review" id="review"></ol>
+    <p></p>
+    <button class="btn" id="again">Play again</button>
   </section>
 
 </main>
@@ -93,40 +55,39 @@
 // Fake references: checked to make sure no paper with this title exists.
 const ITEMS = [
   {a:"R", c:'Ribeiro, M. T., Singh, S., &amp; Guestrin, C. (2016). “Why Should I Trust You?”: Explaining the Predictions of Any Classifier. <em>Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD)</em>.',
-   x:"Real. This is the LIME paper, one of the most-cited papers in explainable AI."},
+   x:"This is the LIME paper, one of the most-cited papers in explainable AI."},
   {a:"R", c:'Lundberg, S. M., &amp; Lee, S.-I. (2017). A Unified Approach to Interpreting Model Predictions. <em>Advances in Neural Information Processing Systems 30 (NeurIPS 2017)</em>.',
-   x:"Real. This is the SHAP paper."},
+   x:"This is the SHAP paper."},
   {a:"R", c:'Bento, J., Saleiro, P., Cruz, A. F., Figueiredo, M. A. T., &amp; Bizarro, P. (2021). TimeSHAP: Explaining Recurrent Models through Sequence Perturbations. <em>Proceedings of the 27th ACM SIGKDD Conference on Knowledge Discovery &amp; Data Mining (KDD)</em>.',
-   x:"Real. TimeSHAP extends SHAP to recurrent models. You'll meet it again in the talk."},
+   x:"TimeSHAP extends SHAP to recurrent models. You'll meet it again in the talk."},
   {a:"R", c:'Shokri, R., Strobel, M., &amp; Zick, Y. (2021). On the Privacy Risks of Model Explanations. <em>Proceedings of the 2021 AAAI/ACM Conference on AI, Ethics, and Society (AIES)</em>.',
-   x:"Real. It shows that explanations can leak whether a record was in the training data."},
+   x:"It shows that explanations can leak whether a record was in the training data."},
   {a:"R", c:'Ross, A. S., Hughes, M. C., &amp; Doshi-Velez, F. (2017). Right for the Right Reasons: Training Differentiable Models by Constraining their Explanations. <em>Proceedings of the 26th International Joint Conference on Artificial Intelligence (IJCAI)</em>.',
-   x:"Real. A classic on penalising input gradients during training."},
+   x:"A classic on penalising input gradients during training."},
   {a:"F", c:'Ribeiro, M. T., Singh, S., &amp; Guestrin, C. (2018). Anchors-TS: High-Precision Explanations for Time Series Classifiers. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>, 32(1).',
-   x:"Hallucinated. The authors, venue and year are real: they published “Anchors: High-Precision Model-Agnostic Explanations” at AAAI 2018. “Anchors-TS” does not exist. Real authors plus a plausible title is the most common fake."},
+   x:"The authors, venue and year are real: they published “Anchors: High-Precision Model-Agnostic Explanations” at AAAI 2018. “Anchors-TS” does not exist. Real authors with a plausible title is the most common fake."},
   {a:"F", c:'Raghavan, P., &amp; Liu, Y. (2023). TempoSHAP++: Temporally Consistent Shapley Values for Sequential Models. <em>IEEE Transactions on Knowledge and Data Engineering</em>, 35(4), 3812–3826.',
-   x:"Hallucinated. A real journal, a believable volume, issue and page range, and no such paper. Precise-looking numbers are not evidence."},
+   x:"A real journal, a believable volume, issue and page range, and no such paper. Precise-looking numbers are not evidence."},
   {a:"F", c:'Sundararajan, M., &amp; Najmi, A. (2021). Baseline-Free Integrated Gradients. <em>Proceedings of the 38th International Conference on Machine Learning (ICML)</em>.',
-   x:"Hallucinated. Sundararajan and Najmi are real (“The Many Shapley Values for Model Explanation”, ICML 2020), but this paper doesn't exist. The title is also a giveaway: Integrated Gradients always needs a baseline."},
+   x:"Sundararajan and Najmi are real (“The Many Shapley Values for Model Explanation”, ICML 2020), but this paper doesn't exist. The title is also a giveaway: Integrated Gradients always needs a baseline."},
   {a:"F", c:'Vaswani, A., Shazeer, N., Parmar, N., et al. (2019). Attention Is All You Need, Revisited: Sparse Transformers for Long Sequences. <em>Advances in Neural Information Processing Systems 32 (NeurIPS 2019)</em>.',
-   x:"Hallucinated. It splices two real papers: Vaswani et al.'s “Attention Is All You Need” (2017) and Child et al.'s Sparse Transformers (2019). LLMs often merge neighbouring papers like this."},
+   x:"It splices two real papers: Vaswani et al.'s “Attention Is All You Need” (2017) and Child et al.'s Sparse Transformers (2019). LLMs often merge neighbouring papers like this."},
   {a:"F", c:'McMahan, H. B., &amp; Ramage, D. (2018). FedAvg-Z: Zero-Communication Federated Averaging for Mobile Keyboards. <em>International Conference on Learning Representations (ICLR)</em>.',
-   x:"Hallucinated. McMahan and Ramage are real federated-learning researchers, but this paper doesn't exist, and “zero-communication federated averaging” is a contradiction in terms."}
+   x:"McMahan and Ramage are real federated-learning researchers, but this paper doesn't exist, and “zero-communication federated averaging” is a contradiction in terms."}
 ];
 // Stable ids and short labels for the room screen.
-const META=[["r1","LIME: “Why Should I Trust You?” (KDD 2016)"],["r2","SHAP: A Unified Approach… (NeurIPS 2017)"],["r3","TimeSHAP (KDD 2021)"],["r4","On the Privacy Risks of Model Explanations (AIES 2021)"],["r5","Right for the Right Reasons (IJCAI 2017)"],["f1","Anchors-TS (AAAI 2018)"],["f2","TempoSHAP++ (IEEE TKDE 2023)"],["f3","Baseline-Free Integrated Gradients (ICML 2021)"],["f4","Attention Is All You Need, Revisited (NeurIPS 2019)"],["f5","FedAvg-Z (ICLR 2018)"]];
+const META=[["r1","LIME: “Why Should I Trust You?” (KDD 2016)"],["r2","SHAP: A Unified Approach to Interpreting Model Predictions (NeurIPS 2017)"],["r3","TimeSHAP (KDD 2021)"],["r4","On the Privacy Risks of Model Explanations (AIES 2021)"],["r5","Right for the Right Reasons (IJCAI 2017)"],["f1","Anchors-TS (AAAI 2018)"],["f2","TempoSHAP++ (IEEE TKDE 2023)"],["f3","Baseline-Free Integrated Gradients (ICML 2021)"],["f4","Attention Is All You Need, Revisited (NeurIPS 2019)"],["f5","FedAvg-Z (ICLR 2018)"]];
 ITEMS.forEach((it,k)=>{it.id=META[k][0];it.s=META[k][1]});
 const SECONDS = 15;
-let order=[], i=0, score=0, timer=null, t0=0, answers=[];
+let order=[], i=0, score=0, timer=null, t0=0, answers=[], nick="";
 const $=id=>document.getElementById(id);
 function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
-function show(id){for(const s of ["start","play","end"])$(s).classList.toggle("hidden",s!==id)}
-let nick="";
+function show(id){for(const s of ["start","play","end"])$(s).classList.toggle("hidden",s!==id);window.scrollTo(0,0)}
 function start(){nick=Results.cleanNick($("nick").value);order=shuffle(ITEMS);i=0;score=0;answers=[];$("sc").textContent=0;show("play");ask()}
 function ask(){
   const it=order[i];
-  $("qn").textContent=(i+1)+" / "+order.length;
-  $("cite").innerHTML=it.c;
+  $("qn").textContent=(i+1)+" of "+order.length;
+  const c=$("cite");c.className="cite";c.innerHTML=it.c;
   $("choices").classList.remove("hidden");$("fb").classList.add("hidden");
   t0=performance.now();clearInterval(timer);
   timer=setInterval(()=>{const left=SECONDS-(performance.now()-t0)/1000;
@@ -140,20 +101,26 @@ function answer(a){
   answers.push({it,a,ok});
   $("sc").textContent=score;
   $("choices").classList.add("hidden");$("fb").classList.remove("hidden");
-  const head=a===null?"Time's up. ":(ok?"Correct. ":"Not quite. ");
-  $("vd").className="verdict "+(ok?"ok":"no");
-  $("vd").innerHTML="<b>"+head+"</b>"+it.x;
-  $("next").textContent=i===order.length-1?"See my score":"Next";
+  // Mark the reference the way a reviewer would: strike the fake, check the real one.
+  $("cite").classList.add(it.a==="F"?"struck":"checked");
+  const head=a===null?"Time's up.":(ok?"Correct.":"Not quite.");
+  const truth=it.a==="R"?"It's real.":"It's hallucinated.";
+  $("vd").className="note "+(ok?"right":"wrong");
+  $("vd").innerHTML="<b>"+head+"</b> "+truth+" "+it.x;
+  $("next").textContent=i===order.length-1?"See my score":"Next reference";
 }
 function next(){i++; if(i<order.length)ask(); else finish()}
 function finish(){
   show("end");$("fs").textContent=score;
-  $("msg").textContent= score>=9?"Excellent. You'd catch most fake references before they reach your paper."
-    : score>=7?"Good, but a few slipped through. In a real paper, one is enough."
-    : score>=5?"Close to a coin toss. That's normal: fakes are built to look real."
-    : "The fakes won this round. That's exactly why we verify instead of trusting our eyes.";
-  $("review").innerHTML=answers.map(r=>'<li><span class="tag '+(r.it.a==="R"?"tR":"tF")+'">'+(r.it.a==="R"?"REAL":"HALLUCINATED")+'</span> '+(r.ok?"✓":"✗")+'<div class="cite" style="font-size:15px;margin-top:4px">'+r.it.c+'</div><div class="muted" style="font-size:14px">'+r.it.x+'</div></li>').join("");
-  window.scrollTo(0,0);
+  $("msg").textContent= score>=9?"You'd catch most fake references before they reached your paper."
+    : score>=7?"A few slipped through. In a real paper, one is enough."
+    : score>=5?"Close to a coin toss — which is normal. The fakes are built to look real."
+    : "The fakes won this round. That's why we verify instead of trusting our eyes.";
+  $("review").innerHTML=answers.map(r=>{
+    const real=r.it.a==="R";
+    return '<li><span class="verdict '+(real?"real":"fake")+'">'+(real?"Real":"Hallucinated")+'</span>'+
+      '<span class="muted small">, and you '+(r.ok?"got it right":"missed it")+'</span>'+
+      '<p class="cite '+(real?"":"struck")+'">'+r.it.c+'</p><p class="muted small" style="margin:0">'+r.it.x+'</p></li>'}).join("");
   report();
 }
 async function report(){
@@ -162,7 +129,7 @@ async function report(){
   el.textContent="Sending your score to the room screen…";
   const r=await Results.send({game:"ref",nickname:nick,score:score,total:order.length,
     answers:answers.map(x=>({id:x.it.id,label:x.it.s,truth:x.it.a==="R"?"Real":"Hallucinated",correct:x.ok}))});
-  el.textContent=r.ok?("On the room screen as “"+nick+"”."):"Couldn't reach the room screen — hold your phone up instead.";
+  el.textContent=r.ok?("Your score is on the room screen as “"+nick+"”."):"The room screen didn't receive your score. Hold your phone up when the speaker asks.";
 }
 $("go").onclick=start;$("again").onclick=start;$("next").onclick=next;
 document.querySelectorAll("#choices button").forEach(b=>b.onclick=()=>answer(b.dataset.a));

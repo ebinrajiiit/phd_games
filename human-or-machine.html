@@ -4,76 +4,46 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Human or Machine?</title>
-<style>
-  :root{--navy:#003087;--gold:#F5A623;--green:#1B7F4B;--red:#C0392B;--bg:#f6f7fb;--card:#fff;--ink:#1d2333;--muted:#5d6475;--line:#dfe3ec;--accent:#003087}
-  @media (prefers-color-scheme:dark){:root{--bg:#0e1424;--card:#172038;--ink:#eef1f8;--muted:#a3abc0;--line:#2a3554;--accent:#8fb1ff}}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-  header{background:var(--navy);color:#fff;padding:14px 16px;border-bottom:4px solid var(--gold);display:flex;justify-content:space-between;align-items:center;gap:12px}
-  header a{color:#fff;text-decoration:none;font-size:14px;opacity:.85}
-  header b{font-size:17px}
-  main{max-width:560px;margin:0 auto;padding:16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
-  h1{font-size:24px;line-height:1.2;margin:4px 0 8px;color:var(--accent)}
-  p{margin:0 0 10px}
-  .muted{color:var(--muted)}
-  .btn{display:block;width:100%;border:0;border-radius:12px;padding:15px;font:inherit;font-weight:700;font-size:17px;cursor:pointer}
-  .primary{background:var(--navy);color:#fff}
-  @media (prefers-color-scheme:dark){.primary{background:#2c5bd6}}
-  .row{display:flex;gap:10px}
-  .hum{background:var(--green);color:#fff}
-  .mac{background:#6b3fa0;color:#fff}
-  .meta{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-bottom:8px}
-  .para{font-family:Georgia,"Times New Roman",serif;font-size:17px;line-height:1.6}
-  .verdict{border-radius:12px;padding:12px 14px;margin:12px 0}
-  .ok{background:rgba(27,127,75,.12);border:1px solid var(--green)}
-  .no{background:rgba(192,57,43,.10);border:1px solid var(--red)}
-  .big{font-size:56px;font-weight:800;line-height:1;color:var(--accent);margin:6px 0}
-  .tip{border-left:4px solid var(--gold);padding:8px 12px;background:rgba(245,166,35,.1);border-radius:6px}
-  .warn{border:1px dashed var(--red);border-radius:10px;padding:10px 12px;color:var(--red);font-size:14px}
-  .hidden{display:none}
-  .nick{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit;background:var(--bg);color:inherit;margin:4px 0 12px}
-  .sent{font-size:14px;text-align:center;margin-top:6px}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><b>Human or Machine?</b><a href="index.html">All games</a></header>
-<main>
+<header class="bar"><p class="title">Human or Machine?</p><a href="index.html">All games</a></header>
+<main class="sheet">
 
-  <section id="start" class="card">
+  <section id="start">
     <h1>Who wrote it?</h1>
-    <p>You'll read short paragraphs from the introductions of research papers. Some were written by researchers before ChatGPT existed. Some were written by an LLM.</p>
-    <p class="muted">Tap your guess. There's no timer, but trust your first instinct.</p>
+    <p>You'll read short paragraphs from the introductions of research papers. Researchers wrote some of them before ChatGPT existed. An LLM wrote the others.</p>
+    <p class="muted">There's no timer, but trust your first instinct.</p>
     <div id="hostwarn" class="warn hidden"></div>
-    <label for="nick" style="font-weight:700">Nickname for the room screen <span class="muted" style="font-weight:400">(optional)</span></label>
-    <input class="nick" id="nick" maxlength="30" autocomplete="off" placeholder="Leave blank for a random one">
+    <label for="nick">Nickname for the room screen<span class="hint">Optional. Leave blank and we'll pick one for you.</span></label>
+    <input type="text" id="nick" maxlength="30" autocomplete="off">
+    <p></p>
     <button class="btn primary" id="go">Start</button>
   </section>
 
   <section id="play" class="hidden">
-    <div class="meta"><span id="qn"></span><span>Score: <b id="sc">0</b></span></div>
-    <div class="card"><div class="para" id="para"></div></div>
-    <div class="row" id="choices">
-      <button class="btn hum" data-a="human">Human</button>
-      <button class="btn mac" data-a="machine">Machine</button>
+    <div class="progress"><span id="qn"></span><span>Score <b id="sc">0</b></span></div>
+    <hr style="margin:6px 0 18px">
+    <p class="para" id="para"></p>
+    <div class="pair" id="choices">
+      <button class="btn hum" data-a="human">A researcher</button>
+      <button class="btn mac" data-a="machine">An LLM</button>
     </div>
     <div id="fb" class="hidden">
-      <div class="verdict" id="vd"></div>
-      <button class="btn primary" id="next">Next</button>
+      <div class="note" id="vd"></div>
+      <button class="btn primary" id="next">Next paragraph</button>
     </div>
   </section>
 
   <section id="end" class="hidden">
-    <div class="card" style="text-align:center">
-      <p class="muted">Your score</p>
-      <div class="big"><span id="fs">0</span>/<span id="ft">0</span></div>
-      <p id="msg"></p>
-      <p class="sent muted" id="sent"></p>
-    </div>
-    <div class="card">
-      <p class="tip"><b>The takeaway:</b> “I can tell when it's AI” is not a safety check. In a study of GPT-3 text, untrained readers did little better than chance (Clark et al., ACL 2021). Judge a paragraph by whether its claims are specific and true, not by how it sounds.</p>
-    </div>
-    <button class="btn primary" id="again">Play again</button>
+    <p class="muted" style="margin:0">Your score</p>
+    <div class="score"><span id="fs">0</span><small> out of <span id="ft">0</span></small></div>
+    <p id="msg"></p>
+    <p class="status" id="sent"></p>
+    <hr>
+    <p><b>“I can tell when it's AI” is not a safety check.</b> In a study of GPT-3 text, untrained readers did little better than chance (Clark et al., ACL 2021). Judge a paragraph by whether its claims are specific and true, not by how it sounds.</p>
+    <p></p>
+    <button class="btn" id="again">Play again</button>
   </section>
 
 </main>
@@ -98,13 +68,13 @@ const HUMAN = [
 /* Machine-written paragraphs (written by an LLM for this game). */
 const MACHINE = [
   {text: "In recent years, deep learning models have achieved remarkable success across a wide range of time series tasks, from healthcare monitoring to financial forecasting. However, their black-box nature poses significant challenges for deployment in high-stakes domains, where understanding the reasoning behind a prediction is crucial. Explainable Artificial Intelligence (XAI) has emerged as a promising paradigm to address this gap. Despite these advances, existing methods often fail to capture the temporal dependencies inherent in sequential data, highlighting the need for novel, temporally aware explanation frameworks.",
-   tell: "Typical LLM tells: “In recent years”, “remarkable success”, “crucial”, “promising paradigm”, “highlighting the need for novel”. Smooth, general and true, but it names no method, dataset or number."},
+   tell: "The tells: “In recent years”, “remarkable success”, “crucial”, “promising paradigm”, “highlighting the need for novel”. Smooth, general and true, but it names no method, dataset or number."},
   {text: "Federated learning has emerged as a transformative paradigm for collaborative model training, enabling multiple institutions to learn a shared model without exchanging raw data. This approach holds immense promise for privacy-sensitive domains such as healthcare, where data silos and regulatory constraints have long hindered progress. Nevertheless, federated learning introduces a unique set of challenges, including statistical heterogeneity, communication overhead, and vulnerability to adversarial participants. Addressing these challenges in a holistic manner remains an open and pressing research question.",
-   tell: "Tells: “transformative paradigm”, “immense promise”, a list of exactly three challenges, “holistic manner”, “open and pressing”. Every sentence could open a thousand different papers."},
+   tell: "The tells: “transformative paradigm”, “immense promise”, a list of exactly three challenges, “holistic manner”, “open and pressing”. Every sentence could open a thousand different papers."},
   {text: "Affective computing, which seeks to enable machines to recognize, interpret, and respond to human emotions, has witnessed a surge of interest in recent years. Multimodal approaches that combine facial expressions, speech, and physiological signals have shown particular promise, as they mirror the inherently multifaceted nature of human emotional expression. Yet, despite substantial progress, current systems struggle to generalize across individuals, cultures, and real-world settings. In this paper, we take a step toward bridging this gap by proposing a robust and interpretable framework for emotion recognition in the wild.",
-   tell: "Tells: “witnessed a surge of interest”, triplets everywhere (recognize, interpret, respond; individuals, cultures, settings), “take a step toward bridging this gap”, and “robust and interpretable” with nothing behind it."},
+   tell: "The tells: “witnessed a surge of interest”, triplets everywhere (recognize, interpret, respond; individuals, cultures, settings), “take a step toward bridging this gap”, and “robust and interpretable” with nothing behind it."},
   {text: "Large language models have revolutionized natural language processing, demonstrating impressive capabilities in tasks ranging from question answering to code generation. As these models are increasingly integrated into real-world applications, the need for rigorous and reliable evaluation has become more critical than ever. Traditional benchmarks, however, often fail to capture the nuanced and context-dependent nature of model behaviour, leading to an incomplete picture of their strengths and limitations. This underscores the importance of developing comprehensive evaluation methodologies that go beyond surface-level metrics.",
-   tell: "Tells: “revolutionized”, “more critical than ever”, “nuanced and context-dependent”, “underscores the importance”. It argues for evaluation without naming one benchmark or one failure."}
+   tell: "The tells: “revolutionized”, “more critical than ever”, “nuanced and context-dependent”, “underscores the importance”. It argues for evaluation without naming one benchmark or one failure."}
 ];
 
 const humanTell = "A researcher wrote this. Human introductions tend to be more specific: concrete methods, datasets, numbers, an opinionated claim, sometimes an awkward sentence.";
@@ -112,34 +82,34 @@ const $=id=>document.getElementById(id);
 let deck=[], i=0, score=0, nick="", log=[];
 function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
 function build(){
-  const h=HUMAN.map((x,k)=>({x,k})).filter(o=>o.x.text.trim()).map(o=>({id:"h"+(o.k+1),label:"Human paragraph "+(o.k+1)+(o.x.source?" — "+o.x.source:""),text:o.x.text.trim(),a:"human",tell:humanTell+(o.x.source?" Source: "+o.x.source+".":"")}));
-  const ML=["Time-series XAI intro","Federated learning intro","Affective computing intro","LLM evaluation intro"];
-  const m=MACHINE.map((x,k)=>({id:"m"+(k+1),label:"LLM paragraph — "+ML[k],text:x.text,a:"machine",tell:x.tell}));
+  const h=HUMAN.map((x,k)=>({x,k})).filter(o=>o.x.text.trim()).map(o=>({id:"h"+(o.k+1),label:"Human paragraph "+(o.k+1)+(o.x.source?" ("+o.x.source+")":""),text:o.x.text.trim(),a:"human",tell:humanTell+(o.x.source?" Source: "+o.x.source+".":"")}));
+  const ML=["Time-series XAI introduction","Federated learning introduction","Affective computing introduction","LLM evaluation introduction"];
+  const m=MACHINE.map((x,k)=>({id:"m"+(k+1),label:ML[k]+" (LLM)",text:x.text,a:"machine",tell:x.tell}));
   return {h,items:shuffle(h.concat(m))};
 }
-function show(id){for(const s of ["start","play","end"])$(s).classList.toggle("hidden",s!==id)}
+function show(id){for(const s of ["start","play","end"])$(s).classList.toggle("hidden",s!==id);window.scrollTo(0,0)}
 function start(){nick=Results.cleanNick($("nick").value);log=[];deck=build().items;i=0;score=0;$("sc").textContent=0;show("play");ask()}
-function ask(){const it=deck[i];$("qn").textContent=(i+1)+" / "+deck.length;$("para").textContent=it.text;
+function ask(){const it=deck[i];$("qn").textContent=(i+1)+" of "+deck.length;$("para").textContent=it.text;
   $("choices").classList.remove("hidden");$("fb").classList.add("hidden");window.scrollTo(0,0)}
 function answer(a){const it=deck[i],ok=a===it.a;if(ok)score++;log.push({id:it.id,label:it.label,truth:it.a==="human"?"Human":"Machine",correct:ok});$("sc").textContent=score;
   $("choices").classList.add("hidden");$("fb").classList.remove("hidden");
-  $("vd").className="verdict "+(ok?"ok":"no");
-  $("vd").innerHTML="<b>"+(ok?"Correct — ":"Not quite — ")+(it.a==="human"?"Human.":"Machine.")+"</b> "+it.tell;
-  $("next").textContent=i===deck.length-1?"See my score":"Next"}
+  $("vd").className="note "+(ok?"right":"wrong");
+  $("vd").innerHTML="<b>"+(ok?"Correct.":"Not quite.")+"</b> "+(it.a==="human"?"":"An LLM wrote this. ")+it.tell;
+  $("next").textContent=i===deck.length-1?"See my score":"Next paragraph"}
 function next(){i++;if(i<deck.length)ask();else{show("end");$("fs").textContent=score;$("ft").textContent=deck.length;
   const r=score/deck.length;
-  $("msg").textContent=r>=.85?"Sharp eye. But the next model will write more like a human — and you won't always have a mix to compare."
-   :r>=.6?"Better than chance, not by much. Most people land here."
-   :"About a coin toss. You're in good company.";report()}}
+  $("msg").textContent=r>=.85?"A sharp eye. But the next model will write more like a person, and you won't always have a mix to compare."
+   :r>=.6?"Better than chance, but not by much. Most people land here."
+   :"About a coin toss, which is where most readers land.";report()}}
 async function report(){
   const el=$("sent");
   if(!Results.ready){el.textContent="";return}
   el.textContent="Sending your score to the room screen…";
   const r=await Results.send({game:"hom",nickname:nick,score:score,total:deck.length,answers:log});
-  el.textContent=r.ok?("On the room screen as “"+nick+"”."):"Couldn't reach the room screen.";
+  el.textContent=r.ok?("Your score is on the room screen as “"+nick+"”."):"The room screen didn't receive your score.";
 }
 (function(){const n=build().h.length;if(n<2){const w=$("hostwarn");w.classList.remove("hidden");
-  w.textContent="Host: only "+n+" human paragraph(s) are set up. Add them in the HOST SETUP block at the top of human-or-machine.html, otherwise every answer is “Machine”.";}})();
+  w.textContent="Host note: "+n+" of 4 human paragraphs are set up. Add the rest in the HOST SETUP block at the top of human-or-machine.html, or every answer will be “An LLM”.";}})();
 $("go").onclick=start;$("again").onclick=start;$("next").onclick=next;
 document.querySelectorAll("#choices button").forEach(b=>b.onclick=()=>answer(b.dataset.a));
 </script>

@@ -4,130 +4,97 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Prompt Duel</title>
+<link rel="stylesheet" href="style.css">
 <style>
-  :root{--navy:#003087;--gold:#F5A623;--green:#1B7F4B;--red:#C0392B;--bg:#f6f7fb;--card:#fff;--ink:#1d2333;--muted:#5d6475;--line:#dfe3ec;--accent:#003087;--field:#fbfcff}
-  @media (prefers-color-scheme:dark){:root{--bg:#0e1424;--card:#172038;--ink:#eef1f8;--muted:#a3abc0;--line:#2a3554;--accent:#8fb1ff;--field:#10182c}}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-  header{background:var(--navy);color:#fff;padding:14px 16px;border-bottom:4px solid var(--gold);display:flex;justify-content:space-between;align-items:center;gap:12px}
-  header a{color:#fff;text-decoration:none;font-size:14px;opacity:.85}
-  header b{font-size:17px}
-  main{max-width:560px;margin:0 auto;padding:16px 16px 120px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
-  h1{font-size:24px;line-height:1.2;margin:4px 0 8px;color:var(--accent)}
-  h2{font-size:17px;margin:0 0 6px;color:var(--accent)}
-  p{margin:0 0 10px}
-  .muted{color:var(--muted)}
-  .btn{display:block;width:100%;border:0;border-radius:12px;padding:14px;font:inherit;font-weight:700;font-size:16px;cursor:pointer}
-  .primary{background:var(--navy);color:#fff}
-  @media (prefers-color-scheme:dark){.primary{background:#2c5bd6}}
-  .ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
-  .opt{display:block;width:100%;text-align:left;background:var(--field);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;font:inherit;color:inherit;cursor:pointer}
-  .opt.sel{border:2px solid var(--gold);background:rgba(245,166,35,.12)}
-  label{display:block;font-weight:700;margin:12px 0 2px}
-  label span{font-weight:400;color:var(--muted);font-size:14px}
-  textarea,input[type=text]{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;background:var(--field);color:inherit;resize:vertical}
-  .check{display:flex;gap:10px;align-items:flex-start;margin:8px 0;font-size:15px}
-  .check input{margin-top:4px;width:18px;height:18px}
-  .meterwrap{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
-  .meterin{max-width:560px;margin:0 auto}
-  .meter{height:12px;background:var(--line);border-radius:99px;overflow:hidden}
+  .sheet{padding-bottom:110px}
+  .opt{display:block;width:100%;text-align:left;background:var(--paper);border:0;border-top:1px solid var(--rule);padding:14px 4px 14px 34px;font:400 18px/1.4 var(--serif);color:var(--ink);cursor:pointer;position:relative}
+  .opt:last-child{border-bottom:1px solid var(--rule)}
+  .opt::before{content:"";position:absolute;left:6px;top:17px;width:16px;height:16px;border:1.5px solid var(--ink);border-radius:50%}
+  .opt.sel::before{background:var(--ink);box-shadow:inset 0 0 0 3px var(--paper)}
+  .letter{font:600 22px/1 var(--serif);color:var(--blue);margin-right:6px}
+  .meterwrap{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--rule);padding:10px 18px calc(12px + env(safe-area-inset-bottom))}
+  .meterin{max-width:36rem;margin:0 auto}
+  .mrow{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;margin-bottom:6px;color:var(--muted)}
+  .mrow b{font:600 22px/1 var(--serif);color:var(--ink)}
+  .timer{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink)}
+  .meter{height:6px;background:var(--rule)}
   .meter i{display:block;height:100%;width:0;background:var(--red);transition:width .25s,background .25s}
-  .mrow{display:flex;justify-content:space-between;align-items:center;font-size:14px;margin-bottom:6px}
-  .mrow b{font-size:18px}
-  .timer{font-variant-numeric:tabular-nums;font-weight:800}
-  pre{white-space:pre-wrap;word-wrap:break-word;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:12px;font:15px/1.5 ui-monospace,Menlo,Consolas,monospace;margin:0 0 10px}
-  .tip{border-left:4px solid var(--gold);padding:8px 12px;background:rgba(245,166,35,.1);border-radius:6px}
-  .twist{border:2px solid var(--red);border-radius:12px;padding:12px 14px;background:rgba(192,57,43,.08)}
-  ul.fb{padding-left:20px;margin:0} ul.fb li{margin-bottom:4px}
-  .hidden{display:none}
+  .manuscript{font:400 17px/1.6 var(--serif);white-space:pre-wrap;word-wrap:break-word;border-left:3px solid var(--ink);padding:2px 0 2px 14px;margin:0 0 16px}
+  ul.advice{padding-left:20px;margin:0} ul.advice li{margin-bottom:6px}
+  .twist{border-left:3px solid var(--red);padding:4px 0 4px 14px;margin:20px 0}
+  .twist b{color:var(--red)}
 </style>
 </head>
 <body>
-<header><b>Prompt Duel</b><a href="index.html">All games</a></header>
-<main>
+<header class="bar"><p class="title">Prompt Duel</p><a href="index.html">All games</a></header>
+<main class="sheet">
 
-  <!-- Step 1: pick a weak prompt -->
   <section id="s1">
-    <div class="card">
-      <h1>Weak to strong</h1>
-      <p>With your partner, pick one weak prompt and rebuild it using <b>RTAFCE</b>: Role, Task, Audience, Format, Constraints, Examples. The meter at the bottom scores your prompt as you type.</p>
-      <label for="team">Team name <span>(shown with your prompt)</span></label>
-      <input type="text" id="team" maxlength="30" placeholder="e.g. Gradient Descenders">
-    </div>
-    <div class="card">
-      <h2>Pick a weak prompt</h2>
-      <div id="weak"></div>
-    </div>
-    <button class="btn primary" id="toBuild" disabled>Build it</button>
+    <h1>Make a weak prompt strong</h1>
+    <p>With your partner, pick one weak prompt and rebuild it using RTAFCE: role, task, audience, format, constraints and an example. A meter at the bottom scores the prompt as you type.</p>
+    <label for="team">Team name<span class="hint">Shown on the room screen next to your prompt.</span></label>
+    <input type="text" id="team" maxlength="30">
+    <h2>Pick a weak prompt</h2>
+    <div id="weak"></div>
+    <p></p>
+    <button class="btn primary" id="toBuild" disabled>Rebuild this prompt</button>
   </section>
 
-  <!-- Step 2: build -->
   <section id="s2" class="hidden">
-    <div class="card">
-      <p class="muted" style="margin:0">Weak prompt</p>
-      <p style="font-size:18px;font-weight:700;margin:0" id="weakShow"></p>
-    </div>
-    <div class="card">
-      <label for="fR">R — Role <span>Who should the AI be?</span></label>
-      <textarea id="fR" rows="2" placeholder="e.g. You are an assistant professor who teaches optimisation"></textarea>
-      <label for="fT">T — Task <span>Exactly what should it do?</span></label>
-      <textarea id="fT" rows="2" placeholder="e.g. Explain backpropagation for a two-layer MLP with a sigmoid hidden layer"></textarea>
-      <label for="fA">A — Audience <span>Who will read the answer?</span></label>
-      <textarea id="fA" rows="2" placeholder="e.g. First-year CSE PhD students who know calculus but not deep learning"></textarea>
-      <label for="fF">F — Format <span>How should it look?</span></label>
-      <textarea id="fF" rows="2" placeholder="e.g. 200 words + one LaTeX equation for the weight update"></textarea>
-      <label for="fC">C — Constraints <span>Limits, assumptions, what to avoid</span></label>
-      <textarea id="fC" rows="2" placeholder="e.g. Assume squared loss; no analogies; use the notation W1, W2"></textarea>
-      <label for="fE">E — Example <span>A sample of what you want</span></label>
-      <textarea id="fE" rows="2" placeholder="e.g. Start like: 'The gradient flows backward because…'"></textarea>
-    </div>
-    <div class="card">
-      <h2>Honesty guards <span class="muted" style="font-weight:400;font-size:14px">(bonus points)</span></h2>
-      <label class="check"><input type="checkbox" id="g1"> Tell me where you are unsure, instead of guessing.</label>
-      <label class="check"><input type="checkbox" id="g2"> Do not invent references; if you cite, give titles I can verify.</label>
-      <label class="check"><input type="checkbox" id="g3"> State the assumptions you made.</label>
-    </div>
-    <div class="row" style="display:flex;gap:10px">
-      <button class="btn ghost" id="back">Back</button>
+    <p class="muted" style="margin:0">You're rebuilding</p>
+    <p class="cite" style="margin-bottom:8px;padding-left:0;text-indent:0" id="weakShow"></p>
+    <hr>
+    <label for="fR"><span class="letter">R</span>Role<span class="hint">Who should the AI be?</span></label>
+    <textarea id="fR" rows="2" placeholder="You are an assistant professor who teaches optimisation"></textarea>
+    <label for="fT"><span class="letter">T</span>Task<span class="hint">Exactly what should it do?</span></label>
+    <textarea id="fT" rows="2" placeholder="Explain backpropagation for a two-layer MLP with a sigmoid hidden layer"></textarea>
+    <label for="fA"><span class="letter">A</span>Audience<span class="hint">Who will read the answer?</span></label>
+    <textarea id="fA" rows="2" placeholder="First-year CSE PhD students who know calculus but not deep learning"></textarea>
+    <label for="fF"><span class="letter">F</span>Format<span class="hint">How should the answer look?</span></label>
+    <textarea id="fF" rows="2" placeholder="200 words and one LaTeX equation for the weight update"></textarea>
+    <label for="fC"><span class="letter">C</span>Constraints<span class="hint">Limits, assumptions, things to avoid.</span></label>
+    <textarea id="fC" rows="2" placeholder="Assume squared loss. No analogies. Use the notation W1 and W2."></textarea>
+    <label for="fE"><span class="letter">E</span>Example<span class="hint">A sample of what you want back.</span></label>
+    <textarea id="fE" rows="2" placeholder="Start like this: “The gradient flows backward because…”"></textarea>
+    <h2>Honesty instructions</h2>
+    <p class="muted small" style="margin-bottom:4px">Each one adds points. They make an AI admit uncertainty instead of inventing.</p>
+    <label class="check"><input type="checkbox" id="g1"> Tell me where you are unsure, instead of guessing.</label>
+    <label class="check"><input type="checkbox" id="g2"> Do not invent references; if you cite, give titles I can verify.</label>
+    <label class="check"><input type="checkbox" id="g3"> State the assumptions you made.</label>
+    <p></p>
+    <div class="pair">
+      <button class="btn" id="back">Back</button>
       <button class="btn primary" id="done">Finish</button>
     </div>
   </section>
 
-  <!-- Step 3: result -->
   <section id="s3" class="hidden">
-    <div class="card" style="text-align:center">
-      <p class="muted" id="teamShow" style="margin:0"></p>
-      <div style="font-size:52px;font-weight:800;color:var(--accent);line-height:1.1"><span id="final">0</span><span style="font-size:24px">/100</span></div>
-      <p id="grade" style="font-weight:700"></p>
-    </div>
-    <div class="card">
-      <h2>Your prompt</h2>
-      <pre id="out"></pre>
-      <button class="btn primary" id="copy">Copy prompt</button>
-      <p class="muted" id="copied" style="text-align:center;margin:6px 0 0"></p>
-      <p class="muted" id="sent" style="text-align:center;margin:6px 0 0"></p>
-    </div>
-    <div class="card" id="submitCard">
-      <h2>Put it up for the vote</h2>
+    <p class="muted" id="teamShow" style="margin:0"></p>
+    <div class="score"><span id="final">0</span><small> out of 100</small></div>
+    <p id="grade" style="font-weight:700"></p>
+    <h2>Your prompt</h2>
+    <div class="manuscript" id="out"></div>
+    <button class="btn primary" id="copy">Copy prompt</button>
+    <p class="status" id="copied"></p>
+    <p class="status" id="sent"></p>
+    <div id="submitCard">
+      <h2>The vote</h2>
       <p id="submitText"></p>
-      <a class="btn primary hidden" id="submitBtn" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">Open the voting poll</a>
+      <a class="btn hidden" id="submitBtn" target="_blank" rel="noopener">Open the voting poll</a>
     </div>
-    <div class="card">
-      <h2>What would make it stronger</h2>
-      <ul class="fb" id="advice"></ul>
-    </div>
+    <h2>What would make it stronger</h2>
+    <ul class="advice" id="advice"></ul>
     <div class="twist hidden" id="twist">
-      <b>Plot twist.</b> You picked “Write my related work section.” The strongest version of that prompt is not to send it. Your related work is your argument for why your research should exist; an LLM can't make that argument for you, and it may cite papers that don't exist. Write it yourself, then ask the AI to <i>critique</i> it as a hostile Reviewer 2.
+      <b>A twist.</b> You picked “Write my related work section.” The strongest version of that prompt is not to send it. Your related work is your argument for why your research should exist; an LLM can't make that argument for you, and it may cite papers that don't exist. Write it yourself, then ask the AI to critique it as a hostile Reviewer 2.
     </div>
-    <button class="btn ghost" id="restart" style="margin-top:12px">Try another prompt</button>
+    <button class="btn" id="restart">Rebuild another prompt</button>
   </section>
 
 </main>
 
 <div class="meterwrap hidden" id="meterwrap">
   <div class="meterin">
-    <div class="mrow"><span>Prompt strength: <b id="score">0</b>/100</span><span>⏱ <span class="timer" id="clock">3:00</span></span></div>
+    <div class="mrow"><span>Prompt strength <b id="score">0</b> out of 100</span><span>Time left <span class="timer" id="clock">3:00</span></span></div>
     <div class="meter"><i id="bar"></i></div>
   </div>
 </div>
@@ -167,7 +134,7 @@ function score(){
   // Each RTAFCE field: up to 12 points (full at 6+ words, partial below).
   const names={fR:"Role",fT:"Task",fA:"Audience",fF:"Format",fC:"Constraints",fE:"Example"};
   for(const f of F){const w=words(v[f]);const pts=Math.min(12,w*2);s+=pts;
-    if(w===0)tips.push("Add a "+names[f]+".");else if(w<6)tips.push("Make the "+names[f]+" more specific ("+w+" words so far).")}
+    if(w===0)tips.push("Add "+(/^[AEIOU]/.test(names[f])?"an ":"a ")+names[f].toLowerCase()+".");else if(w<6)tips.push("Make the "+names[f].toLowerCase()+" more specific ("+w+(w===1?" word":" words")+" so far).")}
   // Specificity signals: up to 18 points.
   const all=F.map(f=>v[f]).join(" ");
   let spec=0;
@@ -180,7 +147,7 @@ function score(){
   if(g<3)tips.push("Tick the honesty guards: they cut down confident nonsense.");
   s=Math.min(100,s);
   $("score").textContent=s;const bar=$("bar");bar.style.width=s+"%";
-  bar.style.background=s>=75?"var(--green)":s>=45?"var(--gold)":"var(--red)";
+  bar.style.background=s>=75?"var(--blue)":s>=45?"var(--ink)":"var(--red)";
   return {s,tips};
 }
 F.concat(["g1","g2","g3"]).forEach(id=>$(id).addEventListener("input",score));
@@ -189,7 +156,7 @@ F.concat(["g1","g2","g3"]).forEach(id=>$(id).addEventListener("change",score));
 function startClock(){if(tick)return;tStart=Date.now();
   tick=setInterval(()=>{const left=Math.max(0,DUEL_SECONDS-Math.floor((Date.now()-tStart)/1000));
     $("clock").textContent=Math.floor(left/60)+":"+String(left%60).padStart(2,"0");
-    if(left===0){clearInterval(tick);$("clock").textContent="Time!"}},250)}
+    if(left===0){clearInterval(tick);$("clock").textContent="Time's up"}},250)}
 
 function show(id){for(const s of ["s1","s2","s3"])$(s).classList.toggle("hidden",s!==id);$("meterwrap").classList.toggle("hidden",id==="s1");window.scrollTo(0,0)}
 $("toBuild").onclick=()=>{$("weakShow").textContent=WEAK[pick];show("s2");startClock();score()};
@@ -202,9 +169,9 @@ $("done").onclick=()=>{
   if(guards.length)parts.push(guards.join(" "));
   $("out").textContent=parts.join("\n")||"(empty)";
   const team=$("team").value.trim();
-  $("teamShow").textContent=team?("Team "+team):"";
+  $("teamShow").textContent=team?("Team "+team+", your prompt scored"):"Your prompt scored";
   $("final").textContent=s;
-  $("grade").textContent=s>=85?"Research-grade.":s>=65?"Strong — a couple of gaps.":s>=40?"Getting there.":"Still a weak prompt.";
+  $("grade").textContent=s>=85?"Research-grade.":s>=65?"Strong, with a couple of gaps.":s>=40?"Getting there.":"Still a weak prompt.";
   $("advice").innerHTML=(tips.length?tips:["Nothing major. Now check the answer as carefully as you wrote the prompt."]).slice(0,4).map(t=>"<li>"+t+"</li>").join("");
   if(SUBMIT_URL){$("submitText").textContent="Copy your prompt, then paste it into the poll with your team name.";
     const b=$("submitBtn");b.href=SUBMIT_URL;b.classList.remove("hidden")}

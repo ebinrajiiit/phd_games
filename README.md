@@ -1,7 +1,9 @@
 # Augmented, Not Automated — classroom games
 
 Three phone games for the PhD Research Methodology session on AI tools at IIIT Kottayam.
-Static pages: nothing a player types leaves their phone.
+Static pages. Only a player's nickname and score are sent to the room screen.
+
+Fonts are self-hosted from `fonts/` (Public Sans and Source Serif 4, both under the SIL Open Font License).
 
 | Game | File | What it does |
 | --- | --- | --- |
