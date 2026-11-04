@@ -11,6 +11,6 @@
    ============================================================ */
 window.GAME_CONFIG = {
   SUPABASE_URL: "https://bphschorkhgwnjcxzjkc.supabase.co",
-  SUPABASE_KEY: "",
-  SESSION: "rm-2026-11"
+  SUPABASE_KEY: "sb_publishable_P3YBd9zZ57yasBvEYLLy5g_JiLW_8mc",
+  SESSION: "test"
 };
