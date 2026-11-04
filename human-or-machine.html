@@ -32,6 +32,8 @@
   .tip{border-left:4px solid var(--gold);padding:8px 12px;background:rgba(245,166,35,.1);border-radius:6px}
   .warn{border:1px dashed var(--red);border-radius:10px;padding:10px 12px;color:var(--red);font-size:14px}
   .hidden{display:none}
+  .nick{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit;background:var(--bg);color:inherit;margin:4px 0 12px}
+  .sent{font-size:14px;text-align:center;margin-top:6px}
 </style>
 </head>
 <body>
@@ -43,6 +45,8 @@
     <p>You'll read short paragraphs from the introductions of research papers. Some were written by researchers before ChatGPT existed. Some were written by an LLM.</p>
     <p class="muted">Tap your guess. There's no timer, but trust your first instinct.</p>
     <div id="hostwarn" class="warn hidden"></div>
+    <label for="nick" style="font-weight:700">Nickname for the room screen <span class="muted" style="font-weight:400">(optional)</span></label>
+    <input class="nick" id="nick" maxlength="30" autocomplete="off" placeholder="Leave blank for a random one">
     <button class="btn primary" id="go">Start</button>
   </section>
 
@@ -64,6 +68,7 @@
       <p class="muted">Your score</p>
       <div class="big"><span id="fs">0</span>/<span id="ft">0</span></div>
       <p id="msg"></p>
+      <p class="sent muted" id="sent"></p>
     </div>
     <div class="card">
       <p class="tip"><b>The takeaway:</b> “I can tell when it's AI” is not a safety check. In a study of GPT-3 text, untrained readers did little better than chance (Clark et al., ACL 2021). Judge a paragraph by whether its claims are specific and true, not by how it sounds.</p>
@@ -72,6 +77,8 @@
   </section>
 
 </main>
+<script src="config.js"></script>
+<script src="results-client.js"></script>
 <script>
 /* ============================================================
    HOST SETUP — add the human-written paragraphs here.
@@ -102,18 +109,19 @@ const MACHINE = [
 
 const humanTell = "A researcher wrote this. Human introductions tend to be more specific: concrete methods, datasets, numbers, an opinionated claim, sometimes an awkward sentence.";
 const $=id=>document.getElementById(id);
-let deck=[], i=0, score=0;
+let deck=[], i=0, score=0, nick="", log=[];
 function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
 function build(){
-  const h=HUMAN.filter(x=>x.text.trim()).map(x=>({text:x.text.trim(),a:"human",tell:humanTell+(x.source?" Source: "+x.source+".":"")}));
-  const m=MACHINE.map(x=>({text:x.text,a:"machine",tell:x.tell}));
+  const h=HUMAN.map((x,k)=>({x,k})).filter(o=>o.x.text.trim()).map(o=>({id:"h"+(o.k+1),label:"Human paragraph "+(o.k+1)+(o.x.source?" — "+o.x.source:""),text:o.x.text.trim(),a:"human",tell:humanTell+(o.x.source?" Source: "+o.x.source+".":"")}));
+  const ML=["Time-series XAI intro","Federated learning intro","Affective computing intro","LLM evaluation intro"];
+  const m=MACHINE.map((x,k)=>({id:"m"+(k+1),label:"LLM paragraph — "+ML[k],text:x.text,a:"machine",tell:x.tell}));
   return {h,items:shuffle(h.concat(m))};
 }
 function show(id){for(const s of ["start","play","end"])$(s).classList.toggle("hidden",s!==id)}
-function start(){deck=build().items;i=0;score=0;$("sc").textContent=0;show("play");ask()}
+function start(){nick=Results.cleanNick($("nick").value);log=[];deck=build().items;i=0;score=0;$("sc").textContent=0;show("play");ask()}
 function ask(){const it=deck[i];$("qn").textContent=(i+1)+" / "+deck.length;$("para").textContent=it.text;
   $("choices").classList.remove("hidden");$("fb").classList.add("hidden");window.scrollTo(0,0)}
-function answer(a){const it=deck[i],ok=a===it.a;if(ok)score++;$("sc").textContent=score;
+function answer(a){const it=deck[i],ok=a===it.a;if(ok)score++;log.push({id:it.id,label:it.label,truth:it.a==="human"?"Human":"Machine",correct:ok});$("sc").textContent=score;
   $("choices").classList.add("hidden");$("fb").classList.remove("hidden");
   $("vd").className="verdict "+(ok?"ok":"no");
   $("vd").innerHTML="<b>"+(ok?"Correct — ":"Not quite — ")+(it.a==="human"?"Human.":"Machine.")+"</b> "+it.tell;
@@ -122,7 +130,14 @@ function next(){i++;if(i<deck.length)ask();else{show("end");$("fs").textContent=
   const r=score/deck.length;
   $("msg").textContent=r>=.85?"Sharp eye. But the next model will write more like a human — and you won't always have a mix to compare."
    :r>=.6?"Better than chance, not by much. Most people land here."
-   :"About a coin toss. You're in good company."}}
+   :"About a coin toss. You're in good company.";report()}}
+async function report(){
+  const el=$("sent");
+  if(!Results.ready){el.textContent="";return}
+  el.textContent="Sending your score to the room screen…";
+  const r=await Results.send({game:"hom",nickname:nick,score:score,total:deck.length,answers:log});
+  el.textContent=r.ok?("On the room screen as “"+nick+"”."):"Couldn't reach the room screen.";
+}
 (function(){const n=build().h.length;if(n<2){const w=$("hostwarn");w.classList.remove("hidden");
   w.textContent="Host: only "+n+" human paragraph(s) are set up. Add them in the HOST SETUP block at the top of human-or-machine.html, otherwise every answer is “Machine”.";}})();
 $("go").onclick=start;$("again").onclick=start;$("next").onclick=next;

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Room Results — Augmented, Not Automated</title>
+<style>
+  :root{--navy:#003087;--gold:#F5A623;--green:#1B7F4B;--red:#C0392B;--purple:#6b3fa0;--bg:#f4f6fb;--card:#fff;--ink:#16203a;--muted:#5d6475;--line:#dde2ec}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  header{background:var(--navy);color:#fff;border-bottom:5px solid var(--gold);padding:12px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+  header h1{font-size:24px;margin:0;font-weight:800;letter-spacing:.01em}
+  .tabs{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+  .tab{border:2px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:999px;padding:7px 16px;font:inherit;font-size:16px;font-weight:700;cursor:pointer}
+  .tab.on{background:var(--gold);border-color:var(--gold);color:#16203a}
+  .status{font-size:13px;color:rgba(255,255,255,.75);width:100%;display:flex;justify-content:space-between;gap:12px}
+  main{padding:20px 24px 28px;max-width:1700px;margin:0 auto}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 20px}
+  .kpi .l{color:var(--muted);font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .kpi .v{font-size:56px;font-weight:800;line-height:1.05;color:var(--navy)}
+  .kpi .v small{font-size:26px;color:var(--muted);font-weight:700}
+  .grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 20px}
+  .panel h2{margin:0 0 12px;font-size:20px;color:var(--navy)}
+  .hist{display:flex;align-items:flex-end;gap:8px;height:260px;padding-top:24px}
+  .hcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px}
+  .hbar{width:100%;background:var(--navy);border-radius:6px 6px 0 0;min-height:2px;position:relative}
+  .hbar.hi{background:var(--gold)}
+  .hn{font-size:15px;font-weight:700;color:var(--ink)}
+  .hx{font-size:15px;color:var(--muted)}
+  ol.lb{list-style:none;margin:0;padding:0}
+  ol.lb li{display:flex;align-items:center;gap:14px;padding:10px 4px;border-bottom:1px solid var(--line);font-size:22px}
+  ol.lb li:last-child{border-bottom:0}
+  .rk{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--bg);color:var(--navy);flex:none}
+  li:nth-child(1) .rk{background:var(--gold);color:#16203a}
+  .nm{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sc{font-weight:800;color:var(--navy)}
+  .reveal{margin:16px 0 0;display:flex;align-items:center;gap:14px}
+  .rbtn{border:0;border-radius:12px;padding:12px 20px;font:inherit;font-weight:800;background:var(--navy);color:#fff;cursor:pointer}
+  .rbtn.ghost{background:transparent;color:var(--navy);border:2px solid var(--navy)}
+  .bd{margin-top:14px}
+  .q{display:grid;grid-template-columns:minmax(260px,2fr) 150px 3fr 90px;align-items:center;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);font-size:19px}
+  .q:last-child{border-bottom:0}
+  .q .lab{font-weight:600}
+  .tag{justify-self:start;font-size:13px;font-weight:800;color:#fff;border-radius:99px;padding:3px 10px;letter-spacing:.03em}
+  .t-real,.t-human{background:var(--green)} .t-fake{background:var(--red)} .t-machine{background:var(--purple)}
+  .track{height:22px;background:var(--bg);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+  .fill{height:100%;border-radius:99px}
+  .pct{font-weight:800;text-align:right;font-size:22px}
+  .lowest{background:rgba(192,57,43,.06)}
+  .headline{font-size:30px;font-weight:800;color:var(--red);margin:4px 0 6px}
+  .duel{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .pc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 18px;display:flex;flex-direction:column;gap:8px}
+  .pc .top{display:flex;align-items:center;gap:12px}
+  .pc .wk{font-size:15px;color:var(--muted)}
+  .pc pre{margin:0;white-space:pre-wrap;word-wrap:break-word;font:16px/1.45 ui-monospace,Menlo,Consolas,monospace;max-height:9.5em;overflow:auto;background:var(--bg);border-radius:10px;padding:10px}
+  .empty{padding:60px 20px;text-align:center;color:var(--muted);font-size:24px}
+  .setup{background:#fff7e6;border:2px dashed var(--gold);border-radius:16px;padding:20px 24px;font-size:18px}
+  .setup code{background:#fff;border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+  .hidden{display:none}
+  @media (max-width:900px){.grid,.duel{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr 1fr}.kpi .v{font-size:36px}.q{grid-template-columns:1fr 110px;}.q .track{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Room results</h1>
+  <div class="tabs" id="tabs">
+    <button class="tab" data-g="ref">Reference Hunt</button>
+    <button class="tab" data-g="hom">Human or Machine?</button>
+    <button class="tab" data-g="duel">Prompt Duel</button>
+  </div>
+  <div class="status"><span id="sess"></span><span id="upd">Connecting…</span></div>
+</header>
+<main id="main"></main>
+
+<script src="config.js"></script>
+<script src="results-client.js"></script>
+<script>
+const params=new URLSearchParams(location.search);
+const SESSION=params.get("session")||Results.session;
+let game=params.get("game")||"ref";
+const revealed={ref:false,hom:false};
+let lastRows=[], timer=null;
+
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined&&text!==null)e.textContent=String(text);return e}
+function setTab(g){game=g;document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.g===g));
+  const u=new URL(location);u.searchParams.set("game",g);history.replaceState(null,"",u);load()}
+
+document.getElementById("sess").textContent="Session: "+SESSION;
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.g));
+
+async function load(){
+  clearTimeout(timer);
+  const main=document.getElementById("main");
+  if(!Results.ready){
+    main.replaceChildren();
+    const s=el("div","setup");
+    s.innerHTML="<b>Not connected yet.</b> Fill in <code>SUPABASE_URL</code> and <code>SUPABASE_KEY</code> in <code>config.js</code>, and run <code>supabase.sql</code> once in the Supabase SQL Editor.";
+    main.append(s);document.getElementById("upd").textContent="";return;
+  }
+  try{
+    const rows=await Results.fetchGame(game,SESSION);
+    lastRows=rows;render(rows);
+    document.getElementById("upd").textContent="Live · updated "+new Date().toLocaleTimeString();
+  }catch(e){document.getElementById("upd").textContent="Can't reach Supabase ("+e.message+") — retrying…"}
+  timer=setTimeout(load,3000);
+}
+
+function render(rows){
+  const main=document.getElementById("main");main.replaceChildren();
+  if(game==="duel")return renderDuel(main,rows);
+  const total=rows.length?Math.max(...rows.map(r=>r.total)):(game==="ref"?10:8);
+  const n=rows.length;
+  const avg=n?rows.reduce((a,r)=>a+r.score,0)/n:0;
+  const best=n?Math.max(...rows.map(r=>r.score)):0;
+
+  // KPIs
+  const k=el("div","kpis");
+  const kpi=(l,v,sub)=>{const d=el("div","kpi");d.append(el("div","l",l));const vv=el("div","v",v);if(sub){vv.append(el("small",null," "+sub))}d.append(vv);return d};
+  k.append(kpi("Players",n),kpi("Room average",n?avg.toFixed(1):"–","/ "+total),kpi("Best score",n?best:"–","/ "+total));
+  main.append(k);
+
+  if(!n){main.append(el("div","empty","Waiting for the first results… scan the QR code to play."));return}
+
+  const g=el("div","grid");
+  // Histogram
+  const hp=el("div","panel");hp.append(el("h2",null,"Score distribution"));
+  const counts=Array(total+1).fill(0);rows.forEach(r=>{if(r.score>=0&&r.score<=total)counts[r.score]++});
+  const mx=Math.max(...counts,1);const hist=el("div","hist");
+  counts.forEach((c,s)=>{const col=el("div","hcol");col.append(el("div","hn",c||""));
+    const b=el("div","hbar"+(s>=Math.ceil(total*0.9)?" hi":""));b.style.height=(c/mx*100)+"%";col.append(b);col.append(el("div","hx",s));hist.append(col)});
+  hp.append(hist);g.append(hp);
+
+  // Leaderboard
+  const lp=el("div","panel");lp.append(el("h2",null,"Top 5"));
+  const ol=el("ol","lb");
+  rows.slice().sort((a,b)=>b.score-a.score||new Date(a.created_at)-new Date(b.created_at)).slice(0,5).forEach((r,i)=>{
+    const li=el("li");li.append(el("span","rk",i+1),el("span","nm",r.nickname),el("span","sc",r.score+"/"+r.total));ol.append(li)});
+  lp.append(ol);g.append(lp);
+  main.append(g);
+
+  // Per-question breakdown
+  const bp=el("div","panel");bp.style.marginTop="16px";
+  const rv=el("div","reveal");
+  const btn=el("button","rbtn"+(revealed[game]?" ghost":""),revealed[game]?"Hide answers":"Reveal question breakdown");
+  btn.onclick=()=>{revealed[game]=!revealed[game];render(lastRows)};
+  rv.append(btn);
+  if(!revealed[game])rv.append(el("span",null,"Shows the right answers — wait until everyone has finished."));
+  bp.append(rv);
+  if(revealed[game]){
+    const stats={};
+    rows.forEach(r=>(r.answers||[]).forEach(a=>{const s=stats[a.id]||(stats[a.id]={label:a.label,truth:a.truth,n:0,ok:0});s.n++;if(a.correct)s.ok++}));
+    const list=Object.values(stats).map(s=>Object.assign(s,{p:s.n?s.ok/s.n:0})).sort((a,b)=>a.p-b.p);
+    if(list.length){
+      const worst=list[0];
+      bp.append(el("div","headline",Math.round((1-worst.p)*100)+"% of this room got “"+worst.label+"” wrong."));
+      const bd=el("div","bd");
+      list.forEach((s,i)=>{const q=el("div","q"+(i<2?" lowest":""));
+        q.append(el("span","lab",s.label));
+        const tc={"Real":"t-real","Hallucinated":"t-fake","Human":"t-human","Machine":"t-machine"}[s.truth]||"t-real";
+        q.append(el("span","tag "+tc,(s.truth||"").toUpperCase()));
+        const tr=el("div","track");const f=el("div","fill");f.style.width=(s.p*100)+"%";
+        f.style.background=s.p<0.5?"var(--red)":s.p<0.75?"var(--gold)":"var(--green)";tr.append(f);q.append(tr);
+        q.append(el("span","pct",Math.round(s.p*100)+"%"));bd.append(q)});
+      bp.append(el("div",null,"Share of players who got each one right, hardest first:"));
+      bp.append(bd);
+    }
+  }
+  main.append(bp);
+}
+
+function renderDuel(main,rows){
+  const n=rows.length;const best=n?Math.max(...rows.map(r=>r.score)):0;
+  const avg=n?rows.reduce((a,r)=>a+r.score,0)/n:0;
+  const k=el("div","kpis");
+  const kpi=(l,v,sub)=>{const d=el("div","kpi");d.append(el("div","l",l));const vv=el("div","v",v);if(sub)vv.append(el("small",null," "+sub));d.append(vv);return d};
+  k.append(kpi("Teams",n),kpi("Average strength",n?Math.round(avg):"–","/ 100"),kpi("Strongest prompt",n?best:"–","/ 100"));
+  main.append(k);
+  if(!n){main.append(el("div","empty","Waiting for the first prompts…"));return}
+  const p=el("div","panel");p.append(el("h2",null,"Top prompts — vote for the one that would get the most useful answer"));
+  const grid=el("div","duel");
+  rows.slice().sort((a,b)=>b.score-a.score||new Date(a.created_at)-new Date(b.created_at)).slice(0,6).forEach((r,i)=>{
+    const c=el("div","pc");const top=el("div","top");
+    top.append(el("span","rk",i+1),el("span","nm",r.nickname),el("span","sc",r.score+"/100"));c.append(top);
+    if(r.weak_prompt)c.append(el("div","wk","Rebuilt from: “"+r.weak_prompt+"”"));
+    c.append(el("pre",null,r.prompt||""));grid.append(c)});
+  p.append(grid);main.append(p);
+  const rw=rows.filter(r=>r.weak_prompt==="Write my related work section.").length;
+  if(rw){const t=el("div","panel");t.style.marginTop="16px";
+    t.append(el("div","headline",rw+(rw===1?" team":" teams")+" tried to strengthen “Write my related work section.”"));
+    t.append(el("div",null,"Ask them what the app told them — then: the strongest version of that prompt is not to send it."));main.append(t)}
+}
+
+setTab(["ref","hom","duel"].includes(game)?game:"ref");
+</script>
+</body>
+</html>

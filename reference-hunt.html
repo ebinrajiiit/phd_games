@@ -36,6 +36,8 @@
   .big{font-size:56px;font-weight:800;line-height:1;color:var(--accent);margin:6px 0}
   ol{padding-left:20px;margin:0} li{margin-bottom:12px}
   .hidden{display:none}
+  .nick{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit;background:var(--bg);color:inherit;margin:4px 0 12px}
+  .sent{font-size:14px;text-align:center;margin-top:6px}
   .tip{border-left:4px solid var(--gold);padding:8px 12px;background:rgba(245,166,35,.1);border-radius:6px}
 </style>
 </head>
@@ -47,6 +49,8 @@
     <h1>Real or Hallucinated?</h1>
     <p>You'll see 10 references on explainable AI and federated learning. Some are real papers. Some were invented, the way a chatbot invents them.</p>
     <p class="muted">15 seconds each. No searching — that's the point.</p>
+    <label for="nick" style="font-weight:700">Nickname for the room screen <span class="muted" style="font-weight:400">(optional)</span></label>
+    <input class="nick" id="nick" maxlength="30" autocomplete="off" placeholder="Leave blank for a random one">
     <button class="btn primary" id="go">Start</button>
   </section>
 
@@ -69,7 +73,7 @@
       <p class="muted">Your score</p>
       <div class="big"><span id="fs">0</span>/10</div>
       <p id="msg"></p>
-      <p class="muted">Hold your phone up when the speaker asks.</p>
+      <p class="sent muted" id="sent"></p>
     </div>
     <div class="card">
       <p class="tip"><b>How to check any reference in 30 seconds:</b> search the exact title in quotes on Google Scholar or Semantic Scholar, then open the DOI. No hit, no citation.</p>
@@ -82,6 +86,8 @@
   </section>
 
 </main>
+<script src="config.js"></script>
+<script src="results-client.js"></script>
 <script>
 // Real references: every detail checked against the publisher or arXiv record.
 // Fake references: checked to make sure no paper with this title exists.
@@ -107,12 +113,16 @@ const ITEMS = [
   {a:"F", c:'McMahan, H. B., &amp; Ramage, D. (2018). FedAvg-Z: Zero-Communication Federated Averaging for Mobile Keyboards. <em>International Conference on Learning Representations (ICLR)</em>.',
    x:"Hallucinated. McMahan and Ramage are real federated-learning researchers, but this paper doesn't exist, and “zero-communication federated averaging” is a contradiction in terms."}
 ];
+// Stable ids and short labels for the room screen.
+const META=[["r1","LIME: “Why Should I Trust You?” (KDD 2016)"],["r2","SHAP: A Unified Approach… (NeurIPS 2017)"],["r3","TimeSHAP (KDD 2021)"],["r4","On the Privacy Risks of Model Explanations (AIES 2021)"],["r5","Right for the Right Reasons (IJCAI 2017)"],["f1","Anchors-TS (AAAI 2018)"],["f2","TempoSHAP++ (IEEE TKDE 2023)"],["f3","Baseline-Free Integrated Gradients (ICML 2021)"],["f4","Attention Is All You Need, Revisited (NeurIPS 2019)"],["f5","FedAvg-Z (ICLR 2018)"]];
+ITEMS.forEach((it,k)=>{it.id=META[k][0];it.s=META[k][1]});
 const SECONDS = 15;
 let order=[], i=0, score=0, timer=null, t0=0, answers=[];
 const $=id=>document.getElementById(id);
 function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
 function show(id){for(const s of ["start","play","end"])$(s).classList.toggle("hidden",s!==id)}
-function start(){order=shuffle(ITEMS);i=0;score=0;answers=[];$("sc").textContent=0;show("play");ask()}
+let nick="";
+function start(){nick=Results.cleanNick($("nick").value);order=shuffle(ITEMS);i=0;score=0;answers=[];$("sc").textContent=0;show("play");ask()}
 function ask(){
   const it=order[i];
   $("qn").textContent=(i+1)+" / "+order.length;
@@ -144,6 +154,15 @@ function finish(){
     : "The fakes won this round. That's exactly why we verify instead of trusting our eyes.";
   $("review").innerHTML=answers.map(r=>'<li><span class="tag '+(r.it.a==="R"?"tR":"tF")+'">'+(r.it.a==="R"?"REAL":"HALLUCINATED")+'</span> '+(r.ok?"✓":"✗")+'<div class="cite" style="font-size:15px;margin-top:4px">'+r.it.c+'</div><div class="muted" style="font-size:14px">'+r.it.x+'</div></li>').join("");
   window.scrollTo(0,0);
+  report();
+}
+async function report(){
+  const el=$("sent");
+  if(!Results.ready){el.textContent="Hold your phone up when the speaker asks.";return}
+  el.textContent="Sending your score to the room screen…";
+  const r=await Results.send({game:"ref",nickname:nick,score:score,total:order.length,
+    answers:answers.map(x=>({id:x.it.id,label:x.it.s,truth:x.it.a==="R"?"Real":"Hallucinated",correct:x.ok}))});
+  el.textContent=r.ok?("On the room screen as “"+nick+"”."):"Couldn't reach the room screen — hold your phone up instead.";
 }
 $("go").onclick=start;$("again").onclick=start;$("next").onclick=next;
 document.querySelectorAll("#choices button").forEach(b=>b.onclick=()=>answer(b.dataset.a));

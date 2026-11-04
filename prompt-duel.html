@@ -106,6 +106,7 @@
       <pre id="out"></pre>
       <button class="btn primary" id="copy">Copy prompt</button>
       <p class="muted" id="copied" style="text-align:center;margin:6px 0 0"></p>
+      <p class="muted" id="sent" style="text-align:center;margin:6px 0 0"></p>
     </div>
     <div class="card" id="submitCard">
       <h2>Put it up for the vote</h2>
@@ -131,6 +132,8 @@
   </div>
 </div>
 
+<script src="config.js"></script>
+<script src="results-client.js"></script>
 <script>
 /* ============================================================
    HOST SETUP
@@ -151,7 +154,7 @@ const WEAK = [
 ];
 const $=id=>document.getElementById(id);
 const F=["fR","fT","fA","fF","fC","fE"];
-let pick=-1, tStart=null, tick=null;
+let pick=-1, tStart=null, tick=null, submitted=false;
 
 $("weak").innerHTML=WEAK.map((w,k)=>'<button class="opt" data-k="'+k+'">'+w+'</button>').join("");
 document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
@@ -208,10 +211,17 @@ $("done").onclick=()=>{
   else $("submitText").textContent="Copy your prompt and be ready to read it out when the speaker calls on your team.";
   $("twist").classList.toggle("hidden",pick!==4);
   show("s3");
+  if(Results.ready&&!submitted){submitted=true;
+    const name=team||Results.randomNick();
+    $("sent").textContent="Sending to the room screen…";
+    Results.send({game:"duel",nickname:Results.cleanNick(name),score:s,total:100,prompt:$("out").textContent,weak_prompt:WEAK[pick]})
+      .then(r=>{$("sent").textContent=r.ok?"Your prompt is on the room screen.":"Couldn't reach the room screen — read it out when called."});
+    $("submitText").textContent="The highest-scoring prompts appear on the room screen. Be ready to read yours out if your team is called.";
+  }
 };
 $("copy").onclick=async()=>{const t=(($("team").value.trim())?("["+$("team").value.trim()+"] "):"")+$("out").textContent;
   try{await navigator.clipboard.writeText(t);$("copied").textContent="Copied."}catch(e){$("copied").textContent="Select the text above and copy it."}};
-$("restart").onclick=()=>{F.forEach(f=>$(f).value="");["g1","g2","g3"].forEach(g=>$(g).checked=false);score();show("s1")};
+$("restart").onclick=()=>{submitted=false;$("sent").textContent="";F.forEach(f=>$(f).value="");["g1","g2","g3"].forEach(g=>$(g).checked=false);score();show("s1")};
 </script>
 </body>
 </html>
