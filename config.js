@@ -10,7 +10,7 @@
    screen starts empty.
    ============================================================ */
 window.GAME_CONFIG = {
-  SUPABASE_URL: "",
+  SUPABASE_URL: "https://bphschorkhgwnjcxzjkc.supabase.co",
   SUPABASE_KEY: "",
   SESSION: "rm-2026-11"
 };
